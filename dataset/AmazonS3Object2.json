@@ -1,0 +1,23 @@
+{
+	"name": "AmazonS3Object2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AmazonS31",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileName": {
+				"type": "String"
+			}
+		},
+		"type": "AmazonS3Object",
+		"typeProperties": {
+			"key": {
+				"value": "@dataset().fileName",
+				"type": "Expression"
+			},
+			"bucketName": "testbtgr"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

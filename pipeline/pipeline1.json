@@ -1,0 +1,150 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "AmazonS3Object1",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"lastModified",
+						"itemName",
+						"itemType",
+						"childItems"
+					]
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Metadata1').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Get Metadata2",
+							"type": "GetMetadata",
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "AmazonS3Object2",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": {
+											"value": "@{item().name}",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"lastModified"
+								]
+							}
+						},
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata2",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(activity('Get Metadata2').output.lastModified,pipeline().parameters.timeStamp)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Copy Data1",
+										"type": "Copy",
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"typeProperties": {
+											"source": {
+												"type": "FileSystemSource",
+												"recursive": true
+											},
+											"sink": {
+												"type": "BlobSink"
+											},
+											"enableStaging": false,
+											"dataIntegrationUnits": 0
+										},
+										"inputs": [
+											{
+												"referenceName": "AmazonS3Object2",
+												"type": "DatasetReference",
+												"parameters": {
+													"fileName": {
+														"value": "@{item().name}",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "AzureBlob1",
+												"type": "DatasetReference",
+												"parameters": {
+													"fileName": {
+														"value": "@{item().name}",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"timeStamp": {
+				"type": "String",
+				"defaultValue": "2018-09-26T16:39:53Z"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
