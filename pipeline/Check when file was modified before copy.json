@@ -1,9 +1,9 @@
 {
-	"name": "pipeline1",
+	"name": "Check when file was modified before copy",
 	"properties": {
 		"activities": [
 			{
-				"name": "Get Metadata1",
+				"name": "Get children",
 				"type": "GetMetadata",
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -14,7 +14,7 @@
 				},
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "AmazonS3Object1",
+						"referenceName": "AmazonS3Folder",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
@@ -26,11 +26,11 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEach child",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Get Metadata1",
+						"activity": "Get children",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -38,13 +38,13 @@
 				],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get Metadata1').output.childItems",
+						"value": "@activity('Get children').output.childItems",
 						"type": "Expression"
 					},
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Get Metadata2",
+							"name": "Get last modified",
 							"type": "GetMetadata",
 							"policy": {
 								"timeout": "7.00:00:00",
@@ -55,7 +55,7 @@
 							},
 							"typeProperties": {
 								"dataset": {
-									"referenceName": "AmazonS3Object2",
+									"referenceName": "AmazonS3File",
 									"type": "DatasetReference",
 									"parameters": {
 										"fileName": {
@@ -74,7 +74,7 @@
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "Get Metadata2",
+									"activity": "Get last modified",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -82,12 +82,12 @@
 							],
 							"typeProperties": {
 								"expression": {
-									"value": "@greater(activity('Get Metadata2').output.lastModified,pipeline().parameters.timeStamp)",
+									"value": "@greater(activity('Get last modified').output.lastModified,pipeline().parameters.timeStamp)",
 									"type": "Expression"
 								},
 								"ifTrueActivities": [
 									{
-										"name": "Copy Data1",
+										"name": "Copy file",
 										"type": "Copy",
 										"policy": {
 											"timeout": "7.00:00:00",
@@ -109,7 +109,7 @@
 										},
 										"inputs": [
 											{
-												"referenceName": "AmazonS3Object2",
+												"referenceName": "AmazonS3File",
 												"type": "DatasetReference",
 												"parameters": {
 													"fileName": {
@@ -121,7 +121,7 @@
 										],
 										"outputs": [
 											{
-												"referenceName": "AzureBlob1",
+												"referenceName": "AzureBlobTarget",
 												"type": "DatasetReference",
 												"parameters": {
 													"fileName": {
