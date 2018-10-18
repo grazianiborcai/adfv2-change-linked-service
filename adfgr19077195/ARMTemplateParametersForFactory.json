@@ -14,10 +14,16 @@
 		"AzureBlobStorage2_connectionString": {
 			"value": ""
 		},
-		"AzureBlob1_properties_typeProperties_fileName": {
+		"AzureBlobStorage3_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage4_connectionString": {
+			"value": ""
+		},
+		"AzureBlobTarget_properties_typeProperties_fileName": {
 			"value": "@dataset().fileName"
 		},
-		"AzureBlob1_properties_typeProperties_folderPath": {
+		"AzureBlobTarget_properties_typeProperties_folderPath": {
 			"value": "input"
 		},
 		"AmazonS31_properties_typeProperties_accessKeyId": {

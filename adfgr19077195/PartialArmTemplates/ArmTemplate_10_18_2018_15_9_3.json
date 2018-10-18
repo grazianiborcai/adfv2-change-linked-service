@@ -6,38 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory Name",
 			"defaultValue": "adfgr19077195"
-		},
-		"AmazonS31_secretAccessKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'secretAccessKey' of 'AmazonS31'"
-		},
-		"AzureBlobStorage1_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
-		},
-		"AzureBlobStorage2_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage2'"
-		},
-		"AzureBlobStorage3_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage3'"
-		},
-		"AzureBlobStorage4_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage4'"
-		},
-		"AzureBlobTarget_properties_typeProperties_fileName": {
-			"type": "string",
-			"defaultValue": "@dataset().fileName"
-		},
-		"AzureBlobTarget_properties_typeProperties_folderPath": {
-			"type": "string",
-			"defaultValue": "input"
-		},
-		"AmazonS31_properties_typeProperties_accessKeyId": {
-			"type": "string",
-			"defaultValue": "AKIAJTZL5OORWWH5F64A"
 		}
 	},
 	"variables": {
@@ -53,7 +21,6 @@
 					{
 						"name": "Get children",
 						"type": "GetMetadata",
-						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -61,12 +28,10 @@
 							"secureOutput": false,
 							"secureInput": false
 						},
-						"userProperties": [],
 						"typeProperties": {
 							"dataset": {
 								"referenceName": "AmazonS3Folder",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"fieldList": [
 								"lastModified",
@@ -87,7 +52,6 @@
 								]
 							}
 						],
-						"userProperties": [],
 						"typeProperties": {
 							"items": {
 								"value": "@activity('Get children').output.childItems",
@@ -98,7 +62,6 @@
 								{
 									"name": "Get last modified",
 									"type": "GetMetadata",
-									"dependsOn": [],
 									"policy": {
 										"timeout": "7.00:00:00",
 										"retry": 0,
@@ -106,7 +69,6 @@
 										"secureOutput": false,
 										"secureInput": false
 									},
-									"userProperties": [],
 									"typeProperties": {
 										"dataset": {
 											"referenceName": "AmazonS3File",
@@ -134,7 +96,6 @@
 											]
 										}
 									],
-									"userProperties": [],
 									"typeProperties": {
 										"expression": {
 											"value": "@greater(activity('Get last modified').output.lastModified,pipeline().parameters.timeStamp)",
@@ -144,7 +105,6 @@
 											{
 												"name": "Copy file",
 												"type": "Copy",
-												"dependsOn": [],
 												"policy": {
 													"timeout": "7.00:00:00",
 													"retry": 0,
@@ -152,7 +112,6 @@
 													"secureOutput": false,
 													"secureInput": false
 												},
-												"userProperties": [],
 												"typeProperties": {
 													"source": {
 														"type": "FileSystemSource",
@@ -201,8 +160,7 @@
 						"type": "String",
 						"defaultValue": "2018-09-26T16:39:53Z"
 					}
-				},
-				"annotations": []
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AmazonS3Folder')]",
@@ -224,7 +182,6 @@
 						"type": "String"
 					}
 				},
-				"annotations": [],
 				"type": "AmazonS3Object",
 				"typeProperties": {
 					"key": {
@@ -233,10 +190,7 @@
 					},
 					"bucketName": "testbtgr"
 				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AmazonS31')]"
-			]
+			}
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AmazonS3Folder')]",
@@ -247,7 +201,6 @@
 					"referenceName": "AmazonS31",
 					"type": "LinkedServiceReference"
 				},
-				"annotations": [],
 				"type": "AmazonS3Object",
 				"typeProperties": {
 					"format": {
@@ -262,10 +215,7 @@
 					"prefix": "",
 					"bucketName": "testbtgr"
 				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AmazonS31')]"
-			]
+			}
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureBlobTarget')]",
@@ -281,88 +231,15 @@
 						"type": "String"
 					}
 				},
-				"annotations": [],
 				"type": "AzureBlob",
 				"typeProperties": {
 					"fileName": {
-						"value": "[parameters('AzureBlobTarget_properties_typeProperties_fileName')]",
+						"value": "@dataset().fileName",
 						"type": "Expression"
 					},
-					"folderPath": "[parameters('AzureBlobTarget_properties_typeProperties_folderPath')]"
+					"folderPath": "input"
 				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AmazonS31')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AmazonS3",
-				"typeProperties": {
-					"accessKeyId": "[parameters('AmazonS31_properties_typeProperties_accessKeyId')]",
-					"secretAccessKey": {
-						"type": "SecureString",
-						"value": "[parameters('AmazonS31_secretAccessKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage2')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureBlobStorage2_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage3')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureBlobStorage3_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage4')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureBlobStorage4_connectionString')]"
-				}
-			},
-			"dependsOn": []
+			}
 		}
 	]
 }
